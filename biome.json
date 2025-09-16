@@ -14,14 +14,7 @@
     "bracketSpacing": true,
     "expand": "auto",
     "useEditorconfig": true,
-    "includes": [
-      "**",
-      "!**/node_modules/",
-      "!**/dist/",
-      "!**/build/",
-      "!**/coverage/",
-      "!**/.commitlintrc.js"
-    ]
+    "includes": ["**", "!**/node_modules/", "!**/dist/", "!**/build/", "!**/coverage/", "!**/.commitlintrc.js"]
   },
   "linter": {
     "enabled": true,
@@ -103,13 +96,7 @@
         "useNamespaceKeyword": "error"
       }
     },
-    "includes": [
-      "**",
-      "!eslint.config.mjs",
-      "!mongo-init.js",
-      "!.commitlintrc.js",
-      "!dist/**"
-    ]
+    "includes": ["**", "!eslint.config.mjs", "!mongo-init.js", "!.commitlintrc.js", "!dist/**"]
   },
   "javascript": {
     "formatter": {
