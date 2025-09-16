@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 
 import { AppModule } from './app.module';
 import { envs } from './config';
+import { ExceptionsFilter } from './filters';
 
 const logger = new Logger('Bootstrap');
 
@@ -25,6 +26,8 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     })
   );
+
+  app.useGlobalFilters(new ExceptionsFilter());
 
   await app.listen(envs.port);
   logger.log(`Application is running on: ${await app.getUrl()}`);
