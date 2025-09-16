@@ -1,0 +1,12 @@
+services:
+  agritec_portal_name:
+    build:
+      context: .
+      dockerfile: dockerfile.prod
+    image: agritec/template:1.0.0
+
+  agritec_portal_latest:
+    build:
+      context: .
+      dockerfile: dockerfile.prod
+    image: agritec/template:latest

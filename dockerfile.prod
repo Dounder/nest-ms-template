@@ -1,0 +1,71 @@
+# Base dependencies layer
+FROM node:24.4.1-alpine3.21 AS base
+
+WORKDIR /usr/src/app
+
+COPY package.json package-lock.json ./
+
+# Install dependencies, skipping lifecycle scripts (like lefthook)
+RUN npm ci --ignore-scripts
+
+# Builder - build the application
+FROM node:24.4.1-alpine3.21 AS build
+
+WORKDIR /usr/src/app
+
+COPY --from=base /usr/src/app/node_modules ./node_modules
+COPY . .
+
+# Build the NestJS application
+RUN npm run build
+
+# Prune development dependencies
+RUN npm prune --omit=dev
+
+# Remove unnecessary files from node_modules to further reduce size
+RUN find ./node_modules -name "*.md" -type f -delete \
+  && find ./node_modules -name "*.ts" -type f -delete \
+  && find ./node_modules -name "*.map" -type f -delete \
+  && find ./node_modules -name "test" -type d -exec rm -rf {} + \
+  && find ./node_modules -name "tests" -type d -exec rm -rf {} +
+
+# Final image
+FROM node:24.4.1-alpine3.21 AS prod
+
+# Install system dependencies required for PDF processing
+RUN apk add --no-cache \
+  fontconfig \
+  freetype \
+  harfbuzz \
+  ca-certificates \
+  ttf-freefont \
+  # Add timezone data
+  tzdata \
+  # Add wget for healthcheck
+  wget
+
+WORKDIR /usr/src/app
+
+# Copy only the necessary files for production
+COPY --from=build /usr/src/app/node_modules ./node_modules
+COPY --from=build /usr/src/app/dist ./dist
+COPY --from=build /usr/src/app/package.json ./package.json
+
+# Set environment variables
+ENV NODE_ENV=production \
+  PORT=3000 \
+  TZ=America/Guatemala
+# Add a health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD wget -qO- http://localhost:3000/ || exit 1
+
+# Set proper ownership for all directories
+RUN chown -R node:node /usr/src/app
+
+# Switch to non-root user for better security
+USER node
+
+EXPOSE 3000
+
+# Use an entrypoint script to handle signals properly
+CMD ["node", "dist/main.js"]

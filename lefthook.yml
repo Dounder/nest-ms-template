@@ -1,0 +1,51 @@
+# Lefthook configuration for Portal Agritec API
+# Maintains code quality and consistency across the application
+# See: https://github.com/evilmartians/lefthook/blob/master/docs/configuration.md
+
+# Pre-commit hooks - run on every commit
+pre-commit:
+  parallel: true
+  commands:
+    # Lint and format TypeScript files with Biome
+    biome-check:
+      glob: "src/**/*.{ts,js,json}"
+      run: npx biome check --write {staged_files}
+      stage_fixed: true
+      fail_text: "Biome check found issues. Please fix them before committing."
+
+    # Type check TypeScript files
+    type-check:
+      glob: "src/**/*.{ts}"
+      run: npx tsc --noEmit --skipLibCheck
+      fail_text: "TypeScript compilation failed. Please fix type errors before committing."
+
+# Pre-push hooks - run before pushing to remote
+pre-push:
+  parallel: true
+  commands:
+    # Run unit tests before pushing
+    # test:
+    #   run: npm run test
+    #   fail_text: "Tests failed. Please fix failing tests before pushing."
+
+    # Run full linting and formatting check on all files
+    biome-check-all:
+      run: npm run lint:check
+      fail_text: "Full project Biome check failed. Please fix all issues before pushing."
+
+    # Run test coverage check
+    # test-coverage:
+    #   run: npm run test:cov
+    #   fail_text: "Test coverage check failed."
+
+# Commit message validation
+commit-msg:
+  commands:
+    commitlint:
+      run: npx commitlint --edit {1}
+      fail_text: "Commit message format is invalid. Use conventional commits format."
+
+# Skip hooks for specific operations
+skip_output:
+  - meta
+  - summary
