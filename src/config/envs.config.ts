@@ -10,6 +10,7 @@ interface EnvVars {
   DATABASE_URL: string;
   PGADMIN_EMAIL: string;
   PGADMIN_PASSWORD: string;
+  NATS_SERVERS: string[];
 }
 
 const envSchema = joi
@@ -21,12 +22,14 @@ const envSchema = joi
     POSTGRES_DB: joi.string().required(),
     DATABASE_URL: joi.string().required(),
     PGADMIN_EMAIL: joi.string().email().default('admin@example.com'),
-    PGADMIN_PASSWORD: joi.string().required().default('Abcd@1234'),
+    PGADMIN_PASSWORD: joi.string().default('Abcd@1234'),
+    NATS_SERVERS: joi.array().items(joi.string()).required(),
   })
   .unknown(true);
 
 const { error, value } = envSchema.validate({
   ...process.env,
+  NATS_SERVERS: process.env.NATS_SERVERS?.split(',') || [],
 }) as {
   error: Error | undefined;
   value: EnvVars;
@@ -45,4 +48,5 @@ export const envs = {
   databaseUrl: envVars.DATABASE_URL,
   pgAdminEmail: envVars.PGADMIN_EMAIL,
   pgAdminPassword: envVars.PGADMIN_PASSWORD,
+  natsServers: envVars.NATS_SERVERS,
 };

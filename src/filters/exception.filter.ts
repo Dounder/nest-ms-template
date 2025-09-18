@@ -1,71 +1,53 @@
-import {
-  ArgumentsHost,
-  BadRequestException,
-  Catch,
-  ExceptionFilter,
-  HttpException,
-  HttpStatus,
-  Logger,
-} from '@nestjs/common';
-import { Response } from 'express';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException, Logger } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
+import { CustomException } from 'src/exceptions/custom.exception';
+import { RpcError } from 'src/types';
 
-interface ValidationErrorResponse {
-  message: string | string[];
-  error: string;
-  statusCode: number;
-}
-
-@Catch()
+@Catch() // Catch all exceptions
 export class ExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(ExceptionsFilter.name);
 
   catch(exception: unknown, host: ArgumentsHost) {
+    this.logger.error(`Exception caught: ${exception}`);
     const ctx = host.switchToHttp();
-    const response = ctx.getResponse<Response>();
-    const request = ctx.getRequest();
+    const response = ctx.getResponse();
 
-    this.logger.error(`Exception caught: ${JSON.stringify(exception)}`);
-
-    // Handle non-HTTP exceptions
-    if (!(exception instanceof HttpException)) {
-      this.logger.error(`Unhandled exception: ${exception}`, exception instanceof Error ? exception.stack : undefined);
-
-      const errorResponse = {
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        timestamp: new Date().toISOString(),
-        path: request.url,
-        method: request.method,
-        message: 'Internal server error',
-        errors: ['Internal Server Error'],
-      };
-
-      return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json(errorResponse);
+    // Handle CustomException specifically
+    if (exception instanceof CustomException) {
+      const { status, message } = exception.getError() as RpcError;
+      response.status(status).json({ status, message });
+      return;
     }
 
-    const status = exception.getStatus();
-    const exceptionResponse = exception.getResponse() as ValidationErrorResponse | string;
+    // Handle other RPC exceptions
+    if (exception instanceof RpcException) {
+      const rpcError = exception.getError();
+      response.status(400).json({
+        status: 400,
+        message: rpcError,
+      });
+      return;
+    }
 
-    const message =
-      typeof exceptionResponse === 'string' ? exceptionResponse : exceptionResponse.message || exception.message;
+    // Handle HTTP exceptions (including class-validator errors)
+    if (exception instanceof HttpException) {
+      const status = exception.getStatus();
+      const exceptionResponse = exception.getResponse();
 
-    const error = typeof exceptionResponse === 'string' ? exception.name : exceptionResponse.error || exception.name;
+      response.status(status).json({
+        status,
+        message:
+          typeof exceptionResponse === 'string'
+            ? exceptionResponse
+            : exceptionResponse['message'] || 'An error occurred',
+      });
+      return;
+    }
 
-    // Special handling for validation errors
-    const isValidationError = exception instanceof BadRequestException && Array.isArray(message);
-    const finalMessage = isValidationError ? 'Validation error' : message;
-    const finalErrors = isValidationError ? message : [error];
-
-    this.logger.error(`HTTP Exception: [${request.method}] ${request.url} - (${status}) - ${JSON.stringify(message)}`);
-
-    const errorResponse = {
-      statusCode: status,
-      timestamp: new Date().toISOString(),
-      path: request.url,
-      method: request.method,
-      message: finalMessage,
-      errors: finalErrors,
-    };
-
-    response.status(status).json(errorResponse);
+    // Handle any other unhandled exceptions
+    response.status(500).json({
+      status: 500,
+      message: 'Internal server error',
+    });
   }
 }

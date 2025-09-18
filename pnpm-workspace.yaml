@@ -1,4 +1,11 @@
+minimumReleaseAge: 1440
+
 onlyBuiltDependencies:
+  - '@apollo/protobufjs'
   - '@nestjs/core'
   - '@prisma/client'
+  - '@prisma/engines'
+  - '@swc/core'
   - lefthook
+  - prisma
+  - unrs-resolver

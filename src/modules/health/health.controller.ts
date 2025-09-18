@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 import { TestErrorDto } from './dto';
 import { HealthService } from './health.service';
 
@@ -6,18 +7,18 @@ import { HealthService } from './health.service';
 export class HealthController {
   constructor(private readonly healthService: HealthService) {}
 
-  @Get()
+  @MessagePattern('health.check')
   checkHealth() {
     return this.healthService.checkHealth();
   }
 
-  @Get('error')
+  @MessagePattern('health.error')
   throwError() {
     throw new Error('This is a test error');
   }
 
-  @Post('error/validation')
-  throwValidationError(@Body() body: TestErrorDto) {
-    return body;
+  @MessagePattern('health.error.validation')
+  throwValidationError(@Payload() Payload: TestErrorDto) {
+    return Payload;
   }
 }

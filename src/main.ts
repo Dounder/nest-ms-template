@@ -1,5 +1,6 @@
-import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 import { AppModule } from './app.module';
 import { envs } from './config';
@@ -8,29 +9,25 @@ import { ExceptionsFilter } from './filters';
 const logger = new Logger('Bootstrap');
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-
-  app.enableCors({ origin: true }); // Enable CORS for all origins
-
-  app.setGlobalPrefix('api');
-
-  app.enableVersioning({
-    type: VersioningType.URI,
-    defaultVersion: '1',
-    prefix: 'v',
-  });
+  const app = await NestFactory.createMicroservice<MicroserviceOptions>(
+    AppModule,
+    {
+      transport: Transport.NATS,
+      options: { servers: envs.natsServers },
+    }
+  );
 
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
-    }),
+    })
   );
 
   app.useGlobalFilters(new ExceptionsFilter());
 
-  await app.listen(envs.port);
-  logger.log(`Application is running on: ${await app.getUrl()}`);
+  await app.listen();
+  logger.log(`Microservice is listening...`);
 }
 
 bootstrap().catch((error) => {

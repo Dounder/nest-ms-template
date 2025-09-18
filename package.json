@@ -28,6 +28,7 @@
     "@nestjs/common": "11.1.6",
     "@nestjs/core": "11.1.6",
     "@nestjs/graphql": "13.1.0",
+    "@nestjs/microservices": "^11.1.6",
     "@nestjs/platform-express": "11.1.6",
     "@prisma/client": "6.16.2",
     "class-transformer": "0.5.1",
@@ -35,6 +36,7 @@
     "dotenv": "17.2.2",
     "graphql": "16.11.0",
     "joi": "18.0.1",
+    "nats": "^2.29.3",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.2"
   },
