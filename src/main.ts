@@ -9,19 +9,16 @@ import { ExceptionsFilter } from './filters';
 const logger = new Logger('Bootstrap');
 
 async function bootstrap() {
-  const app = await NestFactory.createMicroservice<MicroserviceOptions>(
-    AppModule,
-    {
-      transport: Transport.NATS,
-      options: { servers: envs.natsServers },
-    }
-  );
+  const app = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
+    transport: Transport.NATS,
+    options: { servers: envs.natsServers },
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
-    })
+    }),
   );
 
   app.useGlobalFilters(new ExceptionsFilter());

@@ -1,0 +1,16 @@
+{
+  // Extensions recommended for this workspace
+  "recommendations": [
+    "biomejs.biome",
+    "ms-vscode.vscode-typescript-next",
+    "ms-vscode.vscode-json",
+    "bradlc.vscode-tailwindcss"
+  ],
+
+  // Extensions to disable for this workspace (using Biome instead)
+  "unwantedRecommendations": [
+    "esbenp.prettier-vscode",
+    "ms-vscode.vscode-eslint",
+    "dbaeumer.vscode-eslint"
+  ]
+}
