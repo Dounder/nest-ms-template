@@ -1,12 +1,12 @@
 services:
-  agritec_portal_name:
+  ms_template_name:
     build:
       context: .
       dockerfile: dockerfile.prod
-    image: agritec/template:1.0.0
+    image: drglasdou/ms_template:${APP_VERSION:-1.0.0}
 
-  agritec_portal_latest:
+  ms_template_latest:
     build:
       context: .
       dockerfile: dockerfile.prod
-    image: agritec/template:latest
+    image: drglasdou/ms_template:latest

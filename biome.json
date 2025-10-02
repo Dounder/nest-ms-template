@@ -14,7 +14,7 @@
     "bracketSpacing": true,
     "expand": "auto",
     "useEditorconfig": true,
-    "includes": ["**", "!**/node_modules/", "!**/dist/", "!**/build/", "!**/coverage/", "!**/.commitlintrc.js"]
+    "includes": ["src/**"]
   },
   "linter": {
     "enabled": true,
@@ -53,13 +53,6 @@
         "useValidTypeof": "error",
         "useYield": "error"
       },
-      "style": {
-        "noCommonJs": "error",
-        "noNamespace": "error",
-        "useArrayLiterals": "error",
-        "useAsConstAssertion": "error",
-        "useBlockStatements": "off"
-      },
       "suspicious": {
         "noAsyncPromiseExecutor": "error",
         "noCatchAssign": "error",
@@ -96,7 +89,7 @@
         "useNamespaceKeyword": "error"
       }
     },
-    "includes": ["**", "!eslint.config.mjs", "!mongo-init.js", "!.commitlintrc.js", "!dist/**"]
+    "includes": ["src/**"]
   },
   "javascript": {
     "formatter": {
@@ -132,7 +125,7 @@
             "noUnreachable": "off",
             "noUnreachableSuper": "off"
           },
-          "style": { "useConst": "error" },
+          "style": { "useConst": "error", "useImportType": "off" },
           "suspicious": {
             "noClassAssign": "off",
             "noDuplicateClassMembers": "off",
